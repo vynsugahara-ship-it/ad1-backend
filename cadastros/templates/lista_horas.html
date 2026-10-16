@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Horas Trabalhadas - SMC 3Neuron{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="titulo-secao">
+        <div>
+            <h2>Medição de Horas e Atividades</h2>
+            <p style="color: var(--cor-texto-claro); font-size: 0.9rem;">
+                Apontamentos e gestão de horas em contratos e projetos
+            </p>
+        </div>
+
+        <div>
+            <a href="{% url 'registrar_horas' %}" class="btn btn-sucesso">+ Apontar Horas</a>
+        </div>
+    </div>
+
+    <!-- Indicador de Visão de Perfil -->
+    <div class="aviso-visao">
+        <strong>Modo de Exibição:</strong> {{ tipo_visao }}
+    </div>
+
+    <div class="grid-resumo-horas">
+        <div class="destaque-horas">
+            <div>
+                <span>Total de Horas na Visão Atual</span>
+                <h3>Horas Acumuladas</h3>
+            </div>
+            <div>
+                <strong>{{ total_horas }}h</strong>
+            </div>
+        </div>
+
+        {% if total_pendencias > 0 %}
+            <div class="destaque-pendencias">
+                <div>
+                    <span>Aguardando Avaliação</span>
+                    <h3>Pendências</h3>
+                </div>
+                <div>
+                    <strong>{{ total_pendencias }}</strong>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Barra de Filtros por Status -->
+    <div class="barra-filtros">
+        <span class="label-filtro">Filtrar por Status:</span>
+        <a href="?status=TODOS" class="btn-filtro {% if status_filtro == 'TODOS' or not status_filtro %}ativo{% endif %}">Todos</a>
+        <a href="?status=PEN" class="btn-filtro {% if status_filtro == 'PEN' %}ativo{% endif %}">Pendentes</a>
+        <a href="?status=APR" class="btn-filtro {% if status_filtro == 'APR' %}ativo{% endif %}">Aprovados</a>
+        <a href="?status=AJU" class="btn-filtro {% if status_filtro == 'AJU' %}ativo{% endif %}">Ajustes</a>
+    </div>
+
+    {% if user.is_staff %}
+        <!-- Visão Administrador -->
+        <div class="container-colaboradores-horas">
+            {% for item in colaboradores_horas %}
+                <details class="card-colaborador-expansivel" {% if forloop.first or item.pendentes > 0 %}open{% endif %}>
+                    <summary class="summary-colaborador">
+                        <div class="summary-info">
+                            <span class="icone-expansao"></span>
+                            <div>
+                                <strong class="nome-colaborador">{{ item.colaborador.nome_completo }}</strong>
+                                <span class="meta-colaborador">{{ item.colaborador.cargo }} &bull; {{ item.colaborador.get_tipo_contratacao_display }}</span>
+                            </div>
+                        </div>
+
+                        <div class="summary-totais">
+                            {% if item.pendentes > 0 %}
+                                <span class="badge-status status-PEN">{{ item.pendentes }} pendência(s)</span>
+                            {% endif %}
+                            <span class="total-horas-tag">Total: <strong>{{ item.total_horas }}h</strong> ({{ item.total_registros }} registro{{ item.total_registros|pluralize }})</span>
+                        </div>
+                    </summary>
+
+                    <div class="conteudo-detalhes-horas">
+                        <div class="tabela-responsiva">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Projeto / Contrato</th>
+                                        <th>Data</th>
+                                        <th>Horas</th>
+                                        <th>Descrição da Atividade</th>
+                                        <th>Status</th>
+                                        <th style="text-align: center;">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for registro in item.registros %}
+                                        <tr>
+                                            <td><strong>{{ registro.nome_projeto }}</strong></td>
+                                            <td>{{ registro.data|date:"d/m/Y" }}</td>
+                                            <td><strong>{{ registro.horas_trabalhadas }}h</strong></td>
+                                            <td>{{ registro.descricao_atividade }}</td>
+                                            <td>
+                                                <span class="badge-status status-{{ registro.status }}">
+                                                    {{ registro.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <div class="acoes-tabela" style="justify-content: center;">
+                                                    {% if registro.status == 'PEN' %}
+                                                        <a href="{% url 'aprovar_hora' registro.id %}" class="btn btn-sucesso btn-pequeno" title="Aprovar em 1 clique">✓ Aprovar</a>
+                                                    {% endif %}
+                                                    <a href="{% url 'editar_horas' registro.id %}" class="btn btn-secundario btn-pequeno">Editar</a>
+                                                    <a href="{% url 'excluir_horas' registro.id %}" class="btn btn-perigo btn-pequeno" onclick="return confirm('Deseja realmente excluir este lançamento de horas?');">Excluir</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </details>
+            {% empty %}
+                <div class="alerta alerta-info" style="margin-top: 1.5rem; text-align: center;">
+                    Nenhum registro de horas encontrado para os filtros selecionados.
+                </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <!-- Visão Consultor -->
+        <div class="tabela-responsiva" style="margin-top: 1.5rem;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Projeto / Contrato</th>
+                        <th>Data</th>
+                        <th>Horas</th>
+                        <th>Descrição da Atividade</th>
+                        <th>Status</th>
+                        <th style="text-align: center;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for registro in horas %}
+                        <tr>
+                            <td><strong>{{ registro.nome_projeto }}</strong></td>
+                            <td>{{ registro.data|date:"d/m/Y" }}</td>
+                            <td><strong>{{ registro.horas_trabalhadas }}h</strong></td>
+                            <td>{{ registro.descricao_atividade }}</td>
+                            <td>
+                                <span class="badge-status status-{{ registro.status }}">
+                                    {{ registro.get_status_display }}
+                                </span>
+                            </td>
+                            <td style="text-align: center;">
+                                <div class="acoes-tabela" style="justify-content: center;">
+                                    <a href="{% url 'editar_horas' registro.id %}" class="btn btn-secundario btn-pequeno">Editar</a>
+                                    <a href="{% url 'excluir_horas' registro.id %}" class="btn btn-perigo btn-pequeno" onclick="return confirm('Deseja realmente excluir este lançamento de horas?');">Excluir</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 2rem; color: var(--cor-texto-claro);">
+                                Você ainda não possui registros de horas lançados com o filtro selecionado.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
