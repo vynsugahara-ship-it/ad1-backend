@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} - SMC{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 650px; margin: 0 auto;">
+    <div class="titulo-secao">
+        <h2>{{ titulo }}</h2>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <div class="acoes-formulario">
+            <button type="submit" class="btn btn-sucesso">Salvar Colaborador</button>
+            <a href="{% url 'lista_colaboradores' %}" class="btn btn-secundario">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Início - SMC 3Neuron{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="titulo-secao">
+        <div>
+            <h2>Painel Principal do SMC</h2>
+            <p style="color: var(--cor-texto-claro); font-size: 0.9rem;">
+                3Neuron Consultoria &bull; Sistema de Medição de Contratos
+            </p>
+        </div>
+
+        <div>
+            <a href="{% url 'registrar_horas' %}" class="btn btn-sucesso">+ Apontar Horas</a>
+        </div>
+    </div>
+
+    {% if user.is_staff %}
+        <!-- Dashboard Administrador -->
+        <p>
+            Visão consolidada da consultoria. Acompanhe a produtividade dos consultores e aprove apontamentos pendentes.
+        </p>
+
+        <div class="grid-metricas-home">
+            <div class="card-metrica">
+                <span class="metrica-rotulo">Equipe Cadastrada</span>
+                <strong class="metrica-valor">{{ total_colaboradores }}</strong>
+                <span class="metrica-detalhe">colaborador{{ total_colaboradores|pluralize:"es" }} ativo{{ total_colaboradores|pluralize:"s" }}</span>
+                <div style="margin-top: 1rem;">
+                    <a href="{% url 'lista_colaboradores' %}" class="btn btn-secundario btn-pequeno">Ver Equipe</a>
+                </div>
+            </div>
+
+            <div class="card-metrica">
+                <span class="metrica-rotulo">Total de Horas Medidas</span>
+                <strong class="metrica-valor">{{ total_horas_geral }}h</strong>
+                <span class="metrica-detalhe">{{ total_registros }} apontamento{{ total_registros|pluralize:"s" }} registrado{{ total_registros|pluralize:"s" }}</span>
+                <div style="margin-top: 1rem;">
+                    <a href="{% url 'lista_horas' %}" class="btn btn-secundario btn-pequeno">Ver Todas as Horas</a>
+                </div>
+            </div>
+
+            <div class="card-metrica {% if total_pendentes > 0 %}destaque-alerta{% endif %}">
+                <span class="metrica-rotulo">Pendências de Aprovação</span>
+                <strong class="metrica-valor">{{ total_pendentes }}</strong>
+                <span class="metrica-detalhe">apontamento{{ total_pendentes|pluralize:"s" }} aguardando avaliação</span>
+                <div style="margin-top: 1rem;">
+                    {% if total_pendentes > 0 %}
+                        <a href="{% url 'lista_horas' %}?status=PEN" class="btn btn-primario btn-pequeno">Revisar Pendências</a>
+                    {% else %}
+                        <span class="badge-status status-APR">Tudo em dia!</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- Dashboard Consultor -->
+        <p>
+            Olá, <strong>{{ colaborador.nome_completo|default:user.username }}</strong>! 
+            Aqui está o resumo dos seus lançamentos de atividades e contratos.
+        </p>
+
+        <div class="grid-metricas-home">
+            <div class="card-metrica">
+                <span class="metrica-rotulo">Minhas Horas Totais</span>
+                <strong class="metrica-valor">{{ total_minhas_horas }}h</strong>
+                <span class="metrica-detalhe">horas acumuladas registradas</span>
+                <div style="margin-top: 1rem;">
+                    <a href="{% url 'lista_horas' %}" class="btn btn-secundario btn-pequeno">Ver Meus Lançamentos</a>
+                </div>
+            </div>
+
+            <div class="card-metrica">
+                <span class="metrica-rotulo">Apontamentos Aprovados</span>
+                <strong class="metrica-valor">{{ minhas_aprovadas }}</strong>
+                <span class="metrica-detalhe">atividades validadas pela gestão</span>
+                <div style="margin-top: 1rem;">
+                    <a href="{% url 'lista_horas' %}?status=APR" class="btn btn-secundario btn-pequeno">Ver Aprovados</a>
+                </div>
+            </div>
+
+            <div class="card-metrica">
+                <span class="metrica-rotulo">Em Análise (Pendentes)</span>
+                <strong class="metrica-valor">{{ minhas_pendentes }}</strong>
+                <span class="metrica-detalhe">aguardando aprovação do gestor</span>
+                <div style="margin-top: 1rem;">
+                    <a href="{% url 'lista_horas' %}?status=PEN" class="btn btn-secundario btn-pequeno">Ver Pendentes</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="grid-atalhos" style="margin-top: 2rem;">
+        <div class="card-atalho">
+            <div>
+                <h3>Gestão de Colaboradores</h3>
+                <p>Consulte cargos, tipos de contratação e dados da equipe.</p>
+            </div>
+            <div style="margin-top: 0.5rem;">
+                <a href="{% url 'lista_colaboradores' %}" class="btn btn-primario">Acessar Colaboradores</a>
+            </div>
+        </div>
+
+        <div class="card-atalho">
+            <div>
+                <h3>Medição de Horas</h3>
+                <p>Acesse o painel completo de horas e contratos.</p>
+            </div>
+            <div style="margin-top: 0.5rem;">
+                <a href="{% url 'lista_horas' %}" class="btn btn-primario">Acessar Painel de Horas</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

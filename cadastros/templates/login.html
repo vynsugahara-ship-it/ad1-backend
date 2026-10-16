@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Entrar no Sistema - SMC{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="card">
+        <div class="login-header">
+            <h2>Acesso ao SMC</h2>
+            <p>Entre com suas credenciais para continuar</p>
+        </div>
+
+        {% if mensagem_erro %}
+            <div class="erro-formulario">
+                {{ mensagem_erro }}
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+
+            <p>
+                <label for="id_username">Nome de Usuário:</label>
+                <input type="text" name="username" autofocus required id="id_username" placeholder="Digite seu usuário">
+            </p>
+
+            <p>
+                <label for="id_password">Senha:</label>
+                <input type="password" name="password" required id="id_password" placeholder="Digite sua senha">
+            </p>
+
+            <div style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primario" style="width: 100%;">Entrar no Sistema</button>
+            </div>
+        </form>
+
+        <div class="credenciais-demo">
+            <strong>Usuários para teste:</strong><br>
+            &bull; <strong>Admin:</strong> <code>admin</code> / <code>admin123</code><br>
+            &bull; <strong>Consultor:</strong> <code>consultor</code> / <code>consultor123</code>
+        </div>
+    </div>
+</div>
+{% endblock %}

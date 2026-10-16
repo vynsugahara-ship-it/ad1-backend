@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SMC - Sistema de Medição de Contratos{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/estilo.css' %}">
+</head>
+
+<body>
+
+    <header>
+        <div class="cabecalho-container">
+            <div class="logo-titulo">
+                <h1><a href="{% url 'home' %}">SMC</a></h1>
+                <span>3Neuron Consultoria</span>
+            </div>
+
+            <nav>
+                <ul>
+                    {% if user.is_authenticated %}
+                    <li><a href="{% url 'home' %}">Início</a></li>
+                    <li><a href="{% url 'lista_colaboradores' %}">Colaboradores</a></li>
+                    <li><a href="{% url 'lista_horas' %}">Horas Trabalhadas</a></li>
+
+                    <li class="nav-usuario">
+                        <span>Olá, <strong>{{ user.username }}</strong></span>
+                        {% if user.is_staff %}
+                        <span class="badge-perfil badge-admin">Perfil: Admin</span>
+                        {% else %}
+                        <span class="badge-perfil badge-funcionario">Perfil: Funcionário</span>
+                        {% endif %}
+                        <a href="{% url 'logout' %}" class="link-logout">Sair</a>
+                    </li>
+                    {% else %}
+                    <li><a href="{% url 'login' %}">Entrar</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        {% if messages %}
+            <div class="mensagens-container">
+                {% for message in messages %}
+                    <div class="alerta alerta-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p><strong>SMC - Sistema de Medição de Contratos</strong> &copy; 3Neuron Consultoria</p>
+        <p>Projeto Desenvolvido com Python e Django</p>
+    </footer>
+
+</body>
+
+</html>
